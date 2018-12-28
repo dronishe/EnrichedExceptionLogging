@@ -3,27 +3,26 @@ using Microsoft.Extensions.Logging;
 
 namespace EnrichedExceptionLogging
 {
-    public class LoggingMessage<TState>
+    public class LoggingMessage
     {
         public LogLevel LogLevel;
 
         public EventId EventId;
 
         public string Message;
-
-
-        //EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter
-        public TState State { get; set; }
     }
 
-    public interface ILoggingMessageQuee<TState>
+    public interface ILoggingMessageQuee
     {
-        void Enqueue(LoggingMessage<TState> item);
-        LoggingMessage<TState> Dequeue();
+        void Enqueue(LoggingMessage item);
+        LoggingMessage Dequeue();
         int Count { get; }
         void Clear();
     }
 
-    public class LoggingMessageQuee<TState> : Queue<LoggingMessage<TState>>, ILoggingMessageQuee<TState>
-    { }
+    public class LoggingMessageQuee : Queue<LoggingMessage>,ILoggingMessageQuee
+    {
+
+
+    }
 }
