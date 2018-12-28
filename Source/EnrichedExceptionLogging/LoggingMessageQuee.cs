@@ -21,8 +21,5 @@ namespace EnrichedExceptionLogging
     }
 
     public class LoggingMessageQuee : Queue<LoggingMessage>,ILoggingMessageQuee
-    {
-
-
-    }
+    {}
 }

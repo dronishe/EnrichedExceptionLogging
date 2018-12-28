@@ -31,7 +31,7 @@ namespace EnrichedExceptionLogging
                 for (var i = 0; i < messageQuee.Count; i++)
                 {
                     var logEntry = mq.Dequeue();
-                    _logger.Log(logEntry.LogLevel, logEntry.EventId, logEntry.Message);
+                    _logger.LogError(logEntry.EventId, logEntry.Message);
                 }
                   throw;
             }

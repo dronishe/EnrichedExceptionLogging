@@ -64,7 +64,7 @@ namespace EnrichedExceptionLogging.Tests
 
             lmq.Received(2).Dequeue();
             //
-            logger.Received().Log<object>(lm.LogLevel, lm.EventId,Arg.Is<FormattedLogValues>(flv=>flv.ToString() == "message"),
+            logger.Received().Log<object>(LogLevel.Error, lm.EventId,Arg.Is<FormattedLogValues>(flv=>flv.ToString() == "message"),
                 null,Arg.Any<Func<object, Exception, string>>());
         }
 
