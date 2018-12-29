@@ -10,6 +10,7 @@ namespace EnrichedExceptionLoggingExample
 {
     public class Startup
     {
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -21,8 +22,8 @@ namespace EnrichedExceptionLoggingExample
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-            services.AddSingleton<ILoggingMessageQuee, LoggingMessageQuee>();
-            services.AddScoped<InMemoryLogginProvider>();
+
+            services.AddEnrichedExceptionLogging();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -33,7 +34,6 @@ namespace EnrichedExceptionLoggingExample
                 app.UseDeveloperExceptionPage();
             }
             app.UseEnrichedExceptionLoggingMiddleware();
-            loggerFactory.AddProvider(sp.GetService<InMemoryLogginProvider>());
             app.UseMvc();
         }
     }
