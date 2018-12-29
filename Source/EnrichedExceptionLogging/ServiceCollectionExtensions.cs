@@ -13,8 +13,11 @@ namespace EnrichedExceptionLogging
 
             services.AddLogging(
                 builder =>
-                    builder.AddProvider<InMemoryLogginProvider>(sp => sp.GetService<InMemoryLogginProvider>())
-                 .AddFilter<InMemoryLogginProvider>(level => true)
+                {
+                    builder.Services.AddSingleton<ILoggerProvider, InMemoryLogginProvider>();
+                    builder.AddFilter<InMemoryLogginProvider>(level => true);
+
+                }
             );
             return services;
         }
