@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace EnrichedExceptionLogging
 {
-    public class LoggingMessage
+    public struct LoggingMessage
     {
         public LogLevel LogLevel;
 
