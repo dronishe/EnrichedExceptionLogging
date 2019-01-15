@@ -8,11 +8,13 @@ namespace EnrichedExceptionLogging
 {
     public class EnrichedExceptionLoggingMiddleware
     {
+        public bool RethrowException { get; }
         private readonly RequestDelegate _next;
         private readonly ILogger _logger;
 
-        public EnrichedExceptionLoggingMiddleware(RequestDelegate next, ILoggerFactory loggerFactory)
+        public EnrichedExceptionLoggingMiddleware(RequestDelegate next, ILoggerFactory loggerFactory, bool rethrowException)
         {
+            RethrowException = rethrowException;
 
             _next = next ?? throw new ArgumentNullException(nameof(next));
             _logger = loggerFactory?.CreateLogger("EnrichedExceptionLogging") ?? throw new ArgumentNullException(nameof(loggerFactory));
@@ -33,6 +35,7 @@ namespace EnrichedExceptionLogging
                     var logEntry = mq.Dequeue();
                     _logger.LogError(logEntry.EventId, $"{logEntry.LogLevel} {logEntry.Message}");
                 }
+                if(RethrowException)
                   throw;
             }
         }
@@ -40,9 +43,9 @@ namespace EnrichedExceptionLogging
 
     public static class EnrichedExceptionLoggingMiddlewareExtensions
     {
-        public static IApplicationBuilder UseEnrichedExceptionLoggingMiddleware(this IApplicationBuilder builder)
+        public static IApplicationBuilder UseEnrichedExceptionLoggingMiddleware(this IApplicationBuilder builder, bool rethrowException = true)
         {
-            return builder.UseMiddleware<EnrichedExceptionLoggingMiddleware>();
+            return builder.UseMiddleware<EnrichedExceptionLoggingMiddleware>(rethrowException);
         }
     }
 }

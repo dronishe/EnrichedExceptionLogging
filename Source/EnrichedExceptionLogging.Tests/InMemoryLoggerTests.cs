@@ -25,7 +25,6 @@ namespace EnrichedExceptionLogging.Tests
             var iml = new InMemoryLogger(lmq);
             var ex = new Exception();
             iml.Log(LogLevel.Trace, 11,"state", ex, formatter);
-            //lmq.Received().Enqueue(Arg.Is<LoggingMessage>(lm => lm.EventId == 11 && lm.Message=="formatted"));
             lmq.Received().Enqueue(
             new LoggingMessage
             {

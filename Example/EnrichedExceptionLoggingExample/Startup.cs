@@ -33,7 +33,7 @@ namespace EnrichedExceptionLoggingExample
             {
                 app.UseDeveloperExceptionPage();
             }
-            app.UseEnrichedExceptionLoggingMiddleware();
+            app.UseEnrichedExceptionLoggingMiddleware(false);
             app.UseMvc();
         }
     }
