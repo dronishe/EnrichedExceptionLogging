@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -25,14 +26,8 @@ namespace EnrichedExceptionLogging.Tests
             var iml = new InMemoryLogger(lmq);
             var ex = new Exception();
             iml.Log(LogLevel.Trace, 11,"state", ex, formatter);
-            lmq.Received().Enqueue(
-            new LoggingMessage
-            {
-                EventId = 11,
-                LogLevel = LogLevel.Trace,
-                Message = "formatted"
-            });
-            formatter.Received().Invoke("state", ex);
+            lmq.Received().Enqueue(Arg.Is<LoggingMessage>(lm => lm.EventId == 11 && lm.LogLevel == LogLevel.Trace
+                                                                && (string) lm.State == "state" && lm.Exception == ex));
         }
     }
 }

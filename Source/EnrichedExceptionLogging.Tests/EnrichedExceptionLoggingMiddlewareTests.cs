@@ -50,19 +50,21 @@ namespace EnrichedExceptionLogging.Tests
 
             var lmq = Substitute.For<ILoggingMessageQuee>();
             lmq.Count.Returns(2);
+            var ex = new Exception();
             var lm = new LoggingMessage
             {
                 EventId = 1, 
                 LogLevel = LogLevel.Trace,
-                Message = "message"
+                State = "state",
+                Exception = ex
+
             };
             lmq.Dequeue().Returns(lm);
             await eelm.InvokeAsync(new DefaultHttpContext(), lmq);
 
 
             lmq.Received(2).Dequeue();
-            logger.Received().Log<object>(LogLevel.Error, lm.EventId,Arg.Is<FormattedLogValues>(flv=>flv.ToString() == "Trace message"),
-                null,Arg.Any<Func<object, Exception, string>>());
+            logger.Received().Log<object>(LogLevel.Error, lm.EventId, "state", ex, Arg.Any<Func<object, Exception, string>>());
         }
 
         [Fact]

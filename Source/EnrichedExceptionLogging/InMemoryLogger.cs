@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Windows.Forms;
 using Microsoft.Extensions.Logging;
 
 namespace EnrichedExceptionLogging
@@ -20,7 +19,10 @@ namespace EnrichedExceptionLogging
             {
                 EventId = eventId,
                 LogLevel = logLevel,
-                Message = formatter(state,exception)
+                State = state,
+                Exception = exception,
+                Formatter = (s, e) => formatter(state,exception)
+                
             });
         }
 

@@ -28,12 +28,12 @@ namespace EnrichedExceptionLogging
                 await _next(context);
             }
             catch (Exception)
-            {
-                var mq = messageQuee;
+            {                
                 for (var i = 0; i < messageQuee.Count; i++)
                 {
-                    var logEntry = mq.Dequeue();
-                    _logger.LogError(logEntry.EventId, $"{logEntry.LogLevel} {logEntry.Message}");
+                    var logEntry = messageQuee.Dequeue();
+                    _logger.Log<object>(LogLevel.Error, logEntry.EventId, logEntry.State, logEntry.Exception,
+                        ((o, exception) => o.ToString()));
                 }
                 if(RethrowException)
                   throw;
