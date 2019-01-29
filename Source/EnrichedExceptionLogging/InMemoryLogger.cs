@@ -21,19 +21,14 @@ namespace EnrichedExceptionLogging
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
             object updatedState = state;
-            if (state is FormattedLogValues)
+            if (state is IReadOnlyList<KeyValuePair<string, object>> kvpl)
             {
-                updatedState = (state as FormattedLogValues).AddCategoryName(CategoryName).AddLogLevel(logLevel).AddTimeStamp();
-            }
-            else if (state is IReadOnlyList<KeyValuePair<string, object>>)
-            {
-                var kvpl = state as IReadOnlyList<KeyValuePair<string, object>>;
                 if (kvpl.Last().Value != null)
                 {
-                    var message = kvpl.Last().Value.ToString();
-                    var args = kvpl.Take(kvpl.Count - 1).Select(kvp => kvp.Value).ToArray();
-                    var flv = new FormattedLogValues(message, args);
-                    updatedState = flv.AddCategoryName(CategoryName).AddLogLevel(logLevel).AddTimeStamp();
+                    var updatedList = kvpl.AddCategoryName(CategoryName).AddLogLevel(logLevel).AddTimeStamp();
+                    var message = updatedList.Last().Value.ToString();
+                    var args = updatedList.Take(updatedList.Count - 1).Select(kvp => kvp.Value).ToArray();
+                    updatedState = new FormattedLogValues(message, args);
                 }
             }
 

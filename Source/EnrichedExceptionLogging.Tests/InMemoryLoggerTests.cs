@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -45,5 +46,28 @@ namespace EnrichedExceptionLogging.Tests
             flv.Select(kvp => kvp.Value.ToString()).Should().Contain(new[] {"Trace", "catName"});
         }
 
+        [Fact]
+        public void Log_KVPList()
+        {
+            var lmq = Substitute.For<ILoggingMessageQuee>();
+            var iml = new InMemoryLogger(lmq, "catName");
+            var ex = new Exception();
+            var state = new List<KeyValuePair<string, object>>(
+                new[]
+                {
+                    new KeyValuePair<string, object>("{animal}", "dog"),
+                    new KeyValuePair<string, object>("{food}", "cat"),
+                    new KeyValuePair<string, object>("{OriginalMessage}", @"{animal} eats {food}")
+                });
+            var lm = new LoggingMessage();
+
+            lmq.Enqueue(Arg.Do<LoggingMessage>(arg => lm = arg));
+
+            iml.Log(LogLevel.Trace, 11, state, ex, Substitute.For<Func<object, Exception, string>>());
+            var flv = lm.State as FormattedLogValues;
+            var message = flv.Last().Value as string;
+            message.Should().ContainAll(new[] { "OriginalTimeStamp", "OriginalLogLevel", "OriginalSourceContext" });
+            flv.Select(kvp => kvp.Value.ToString()).Should().Contain(new[] { "Trace", "catName" });
+        }
     }
 }
