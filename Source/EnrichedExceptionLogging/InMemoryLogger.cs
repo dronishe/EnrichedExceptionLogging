@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Internal;
 
@@ -11,23 +10,19 @@ namespace EnrichedExceptionLogging
         public string CategoryName { get; }
 
         private readonly LoggerExternalScopeProvider _externalScopeProvider;
-        public InMemoryLogger(ILoggingMessageQuee messageQuee)
+        public InMemoryLogger(ILoggingMessageQuee messageQuee, string categoryName)
         {
             MessageQuee = messageQuee;
-           
-            _externalScopeProvider = new LoggerExternalScopeProvider();
+            CategoryName = categoryName;
+             _externalScopeProvider = new LoggerExternalScopeProvider();
         }
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
             object updatedState = state;
             if (state is FormattedLogValues)
             {
-                updatedState = (state as FormattedLogValues).AddLogLevel(logLevel).AddTimeStamp();
-
-
+                updatedState = (state as FormattedLogValues).AddCategoryName(CategoryName).AddLogLevel(logLevel).AddTimeStamp();
             }
-            //var qq = new List<KeyValuePair<string, object>>(
-            //    updatedState as IReadOnlyList<KeyValuePair<string, object>>);
 
             MessageQuee.Enqueue(new LoggingMessage
             {
