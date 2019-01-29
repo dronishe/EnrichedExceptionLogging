@@ -10,13 +10,15 @@ namespace EnrichedExceptionLogging
     {
         public ILoggingMessageQuee MessageQuee { get; }
         public string CategoryName { get; }
+        public IStructuredLogMessageAppender MessageAppender { get; }
 
         private readonly LoggerExternalScopeProvider _externalScopeProvider;
-        public InMemoryLogger(ILoggingMessageQuee messageQuee, string categoryName)
+        public InMemoryLogger(ILoggingMessageQuee messageQuee, string categoryName, IStructuredLogMessageAppender messageAppender)
         {
             MessageQuee = messageQuee;
             CategoryName = categoryName;
-             _externalScopeProvider = new LoggerExternalScopeProvider();
+            MessageAppender = messageAppender;
+            _externalScopeProvider = new LoggerExternalScopeProvider();
         }
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
@@ -25,11 +27,8 @@ namespace EnrichedExceptionLogging
             {
                 if (kvpl.Last().Value != null)
                 {
-                    var updatedList = kvpl.AddCategoryName(CategoryName).AddLogLevel(logLevel).AddTimeStamp();
-                    var message = updatedList.Last().Value.ToString();
-                    var args = updatedList.Take(updatedList.Count - 1).Select(kvp => kvp.Value).ToArray();
-                    updatedState = new FormattedLogValues(message, args);
-                }
+                    updatedState = MessageAppender.Append(kvpl, logLevel, CategoryName);
+                }   
             }
 
             MessageQuee.Enqueue(new LoggingMessage
