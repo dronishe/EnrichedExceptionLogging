@@ -18,7 +18,9 @@ namespace EnrichedExceptionLoggingExample.Controllers
         [HttpGet]
         public IEnumerable<string> Get()
         {
+
             Logger.LogTrace("Information from get method!");
+            Logger.LogError("{Animal1} eats {animal2}", "dog", "cat", "panda");
             throw new Exception("Smthg wrong!");
             return new string[] { "value1", "value2" };
         }

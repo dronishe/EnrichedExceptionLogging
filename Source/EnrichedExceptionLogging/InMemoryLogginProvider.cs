@@ -15,7 +15,7 @@ namespace EnrichedExceptionLogging
         }
         public ILogger CreateLogger(string categoryName)
         {
-            return new InMemoryLogger(MessageQuee);
+            return new InMemoryLogger(MessageQuee,categoryName);
         }
     }
 }
