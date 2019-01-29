@@ -41,7 +41,7 @@ namespace EnrichedExceptionLogging.Tests
             iml.Log(LogLevel.Trace, 11, lfm, ex, Substitute.For<Func<object, Exception, string>>());
             var flv = lm.State as FormattedLogValues;
             var message = flv.Last().Value as string;
-            message.Should().ContainAll(new[] {"TimeStamp", "OriginalLogLevel", "CategoryName"});
+            message.Should().ContainAll(new[] {"OriginalTimeStamp", "OriginalLogLevel", "OriginalSourceContext" });
             flv.Select(kvp => kvp.Value.ToString()).Should().Contain(new[] {"Trace", "catName"});
         }
 

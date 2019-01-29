@@ -8,13 +8,13 @@ namespace EnrichedExceptionLogging
     public static class FormattedLogValuesExtensions
     {
         public static FormattedLogValues AddTimeStamp(this FormattedLogValues flv)
-                =>  AppendTuple(flv, "TimeStamp", DateTime.Now.ToString("O"));
+                =>  AppendTuple(flv, "OriginalTimeStamp", DateTime.Now.ToString("O"));
   
         public static FormattedLogValues AddLogLevel(this FormattedLogValues flv, LogLevel level) =>
             AppendTuple(flv, "OriginalLogLevel", level);
 
         public static FormattedLogValues AddCategoryName(this FormattedLogValues flv, string categoryName) =>
-            AppendTuple(flv, "CategoryName", categoryName);
+            AppendTuple(flv, "OriginalSourceContext", categoryName);
 
         private static FormattedLogValues AppendTuple(FormattedLogValues flv, string key, object value)
         {
