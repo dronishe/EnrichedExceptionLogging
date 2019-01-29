@@ -15,8 +15,9 @@ namespace EnrichedExceptionLogging
                 builder =>
                 {
                     builder.Services.AddSingleton<ILoggerProvider, InMemoryLogginProvider>();
-                    builder.AddFilter<InMemoryLogginProvider>(level => true);
+                    builder.Services.AddSingleton<IStructuredLogMessageAppender, StructuredLogMessageAppender>();
 
+                    builder.AddFilter<InMemoryLogginProvider>(level => true);
                 }
             );
             return services;

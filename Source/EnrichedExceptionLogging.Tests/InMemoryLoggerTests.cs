@@ -14,7 +14,7 @@ namespace EnrichedExceptionLogging.Tests
         [Fact]
         public void Enabled()
         {
-            var iml = new InMemoryLogger(Substitute.For<ILoggingMessageQuee>(),"");
+            var iml = new InMemoryLogger(Substitute.For<ILoggingMessageQuee>(),"", Substitute.For<IStructuredLogMessageAppender>());
             iml.IsEnabled(LogLevel.Trace).Should().BeTrue();
             iml.IsEnabled(LogLevel.Error).Should().BeTrue();
         }
@@ -23,7 +23,7 @@ namespace EnrichedExceptionLogging.Tests
         public void Log()
         {
             var lmq = Substitute.For<ILoggingMessageQuee>();
-            var iml = new InMemoryLogger(lmq,"");
+            var iml = new InMemoryLogger(lmq,"", Substitute.For<IStructuredLogMessageAppender>());
             var ex = new Exception();
             iml.Log(LogLevel.Trace, 11,"state", ex, Substitute.For<Func<object, Exception, string>>());
             lmq.Received().Enqueue(Arg.Is<LoggingMessage>(lm => lm.EventId == 11 && lm.LogLevel == LogLevel.Trace
@@ -34,24 +34,29 @@ namespace EnrichedExceptionLogging.Tests
         public void Log_FormattedLogValues()
         {
             var lmq = Substitute.For<ILoggingMessageQuee>();
-            var iml = new InMemoryLogger(lmq, "catName");
-            var ex = new Exception();
+            var ma = Substitute.For<IStructuredLogMessageAppender>();
+            var flv = new FormattedLogValues("","");
+            ma.Append(null, LogLevel.None, "").ReturnsForAnyArgs(flv);
+
+            var iml = new InMemoryLogger(lmq, "catName", ma);
             var lfm = new FormattedLogValues("{animal} eats {food}", "dog", "cat");
+
             var lm = new LoggingMessage();
             lmq.Enqueue(Arg.Do<LoggingMessage>(arg => lm = arg));
-            iml.Log(LogLevel.Trace, 11, lfm, ex, Substitute.For<Func<object, Exception, string>>());
-            var flv = lm.State as FormattedLogValues;
-            var message = flv.Last().Value as string;
-            message.Should().ContainAll(new[] {"OriginalTimeStamp", "OriginalLogLevel", "OriginalSourceContext" });
-            flv.Select(kvp => kvp.Value.ToString()).Should().Contain(new[] {"Trace", "catName"});
+            iml.Log(LogLevel.Trace, 11, lfm, new Exception(), Substitute.For<Func<object, Exception, string>>());
+            ma.Received().Append(lfm, LogLevel.Trace, "catName");
+
+            lm.State.Should().BeEquivalentTo(flv);
         }
 
         [Fact]
         public void Log_KVPList()
         {
             var lmq = Substitute.For<ILoggingMessageQuee>();
-            var iml = new InMemoryLogger(lmq, "catName");
-            var ex = new Exception();
+            var ma = Substitute.For<IStructuredLogMessageAppender>();
+            var flv = new FormattedLogValues("", "");
+            ma.Append(null, LogLevel.None, "").ReturnsForAnyArgs(flv);
+            var iml = new InMemoryLogger(lmq, "catName",ma);
             var state = new List<KeyValuePair<string, object>>(
                 new[]
                 {
@@ -63,11 +68,9 @@ namespace EnrichedExceptionLogging.Tests
 
             lmq.Enqueue(Arg.Do<LoggingMessage>(arg => lm = arg));
 
-            iml.Log(LogLevel.Trace, 11, state, ex, Substitute.For<Func<object, Exception, string>>());
-            var flv = lm.State as FormattedLogValues;
-            var message = flv.Last().Value as string;
-            message.Should().ContainAll(new[] { "OriginalTimeStamp", "OriginalLogLevel", "OriginalSourceContext" });
-            flv.Select(kvp => kvp.Value.ToString()).Should().Contain(new[] { "Trace", "catName" });
+            iml.Log(LogLevel.Trace, 11, state, new Exception(), Substitute.For<Func<object, Exception, string>>());
+            ma.Received().Append(state, LogLevel.Trace, "catName");
+            lm.State.Should().BeEquivalentTo(flv);
         }
     }
 }
