@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Formatting.Json;
 
 namespace EnrichedExceptionLoggingExample
 {
@@ -15,6 +17,14 @@ namespace EnrichedExceptionLoggingExample
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+
+            // Log.Logger
+            Log.Logger = new LoggerConfiguration()
+                .Enrich.FromLogContext()
+                .MinimumLevel.Information()
+                .WriteTo.RollingFile(new JsonFormatter(null,true), "Logs\\Json-log-{Date}.txt")
+                .WriteTo.RollingFile("Logs\\log-{Date}.txt")
+                .CreateLogger();
         }
 
         public IConfiguration Configuration { get; }
@@ -22,6 +32,8 @@ namespace EnrichedExceptionLoggingExample
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLogging(lb => lb.AddSerilog(dispose: true));
+
             services.AddMvc();
             
             services.AddEnrichedExceptionLogging();
