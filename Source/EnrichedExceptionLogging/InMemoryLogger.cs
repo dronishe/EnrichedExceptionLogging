@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Internal;
 
@@ -22,6 +24,17 @@ namespace EnrichedExceptionLogging
             if (state is FormattedLogValues)
             {
                 updatedState = (state as FormattedLogValues).AddCategoryName(CategoryName).AddLogLevel(logLevel).AddTimeStamp();
+            }
+            else if (state is IReadOnlyList<KeyValuePair<string, object>>)
+            {
+                var kvpl = state as IReadOnlyList<KeyValuePair<string, object>>;
+                if (kvpl.Last().Value != null)
+                {
+                    var message = kvpl.Last().Value.ToString();
+                    var args = kvpl.Take(kvpl.Count - 1).Select(kvp => kvp.Value).ToArray();
+                    var flv = new FormattedLogValues(message, args);
+                    updatedState = flv.AddCategoryName(CategoryName).AddLogLevel(logLevel).AddTimeStamp();
+                }
             }
 
             MessageQuee.Enqueue(new LoggingMessage
