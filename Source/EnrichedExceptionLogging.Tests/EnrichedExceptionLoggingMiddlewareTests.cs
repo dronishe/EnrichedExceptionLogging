@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Internal;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Xunit;

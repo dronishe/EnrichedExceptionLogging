@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -8,16 +9,16 @@ namespace EnrichedExceptionLogging
 {
     public class EnrichedExceptionLoggingMiddleware
     {
+        public ILoggerFactory LoggerFactory { get; }
         public bool RethrowException { get; }
         private readonly RequestDelegate _next;
-        private readonly ILogger _logger;
 
         public EnrichedExceptionLoggingMiddleware(RequestDelegate next, ILoggerFactory loggerFactory, bool rethrowException)
         {
+            LoggerFactory = loggerFactory;
             RethrowException = rethrowException;
 
             _next = next ?? throw new ArgumentNullException(nameof(next));
-            _logger = loggerFactory?.CreateLogger("EnrichedExceptionLogging") ?? throw new ArgumentNullException(nameof(loggerFactory));
         }
 
         public async Task InvokeAsync(HttpContext context, ILoggingMessageQuee messageQuee)
@@ -28,13 +29,19 @@ namespace EnrichedExceptionLogging
                 await _next(context);
             }
             catch (Exception)
-            {                
-                for (var i = 0; i < messageQuee.Count; i++)
-                {
-                    var logEntry = messageQuee.Dequeue();
-                    _logger.Log<object>(LogLevel.Error, logEntry.EventId, logEntry.State, logEntry.Exception,
+            {
+                var pp = messageQuee.Count;
+                var messages = new List<LoggingMessage>();
+
+                var logger = LoggerFactory?.CreateLogger("EnrichedExceptionLogging") ?? throw new ArgumentNullException(nameof(LoggerFactory));
+                for (var i = 0; i < pp; i++)
+                    messages.Add(messageQuee.Dequeue());
+
+                foreach (var logEntry in messages)
+
+                    logger.Log<object>(LogLevel.Error, logEntry.EventId, logEntry.State, logEntry.Exception,
                         ((o, exception) => o.ToString()));
-                }
+
                 if(RethrowException)
                   throw;
             }
