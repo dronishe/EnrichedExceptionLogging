@@ -25,7 +25,7 @@ namespace EnrichedExceptionLogging
             object updatedState = state;
             if (state is IReadOnlyList<KeyValuePair<string, object>> kvpl)
             {
-                if (kvpl.Last().Value != null)
+                if (kvpl.Any() && kvpl.Last().Value != null)
                 {
                     updatedState = MessageAppender.Append(kvpl, logLevel, CategoryName);
                 }   

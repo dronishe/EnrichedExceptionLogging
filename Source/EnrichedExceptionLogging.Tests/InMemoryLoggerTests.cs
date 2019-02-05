@@ -71,5 +71,23 @@ namespace EnrichedExceptionLogging.Tests
             ma.Received().Append(state, LogLevel.Trace, "catName");
             lm.State.Should().BeEquivalentTo(flv);
         }
+
+        [Fact]
+        public void Log_Empty_KVPList()
+        {
+            var lmq = Substitute.For<ILoggingMessageQuee>();
+            var ma = Substitute.For<IStructuredLogMessageAppender>();
+            var iml = new InMemoryLogger(lmq, "catName", ma);
+            var state = new List<KeyValuePair<string, object>>();
+                
+            var lm = new LoggingMessage();
+
+            lmq.Enqueue(Arg.Do<LoggingMessage>(arg => lm = arg));
+
+            iml.Log(LogLevel.Trace, 11, state, new Exception(), Substitute.For<Func<object, Exception, string>>());
+
+            ma.DidNotReceive().Append(state, LogLevel.Trace, "catName");
+            lm.LogLevel.Should().Be(LogLevel.Trace);
+        }
     }
 }
