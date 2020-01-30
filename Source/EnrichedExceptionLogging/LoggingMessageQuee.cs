@@ -1,15 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 
 namespace EnrichedExceptionLogging
 {
-    public class LoggingMessage
+    public struct LoggingMessage
     {
         public LogLevel LogLevel;
 
         public EventId EventId;
 
-        public string Message;
+        public object State;
+
+        public Exception Exception;
+
+        public Func<object, Exception, string> Formatter;        
     }
 
     public interface ILoggingMessageQuee
